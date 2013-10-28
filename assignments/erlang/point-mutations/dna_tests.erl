@@ -21,11 +21,11 @@ small_hamming_distance_in_middle_somewhere_test() ->
 larger_distance_test() ->
     ?assertEqual(dna:hamming_distance("ACCAGGG", "ACTATGG"), 2).
 
-ignores_extra_lenght_on_other_strand_when_longer_test() ->
-    ?assertEqual(dna:hamming_distance("AAACTAGGGG", "AGGCTAGCGGTAGGAC"), 5).
+ignores_extra_length_on_other_strand_when_longer_test() ->
+    ?assertEqual(dna:hamming_distance("GACTACGGACAGGGTAGGGAAT", "GACATCGCACACC"), 5).
 
 does_not_actually_shorten_original_strand_test() ->
-    ?assertEqual(dna:hamming_distance("AGACAACAGCCAGCCGCCGGATT" "AGGCAA"), 1),
-    ?assertEqual(dna:hamming_distance("AGACAACAGCCAGCCGCCGGATT" "AGGCAA"), 1),
-    ?assertEqual(dna:hamming_distance("AGACAACAGCCAGCCGCCGGATT" "AGACAACAGCCAGCCGCCGGATTAGGCAA"), 1),
-    ?assertEqual(dna:hamming_distance("AGACAACAGCCAGCCGCCGGATT" "AGG"), 1).
+    ?assertEqual(dna:hamming_distance("AGACAACAGCCAGCCGCCGGATT", "AGGCAA"), 1),
+    ?assertEqual(dna:hamming_distance("AGACAACAGCCAGCCGCCGGATT", "AGGCAA"), 1),
+    ?assertEqual(dna:hamming_distance("AGACAACAGCCAGCCGCCGGATT", "AGACATCTTTCAGCCGCCGGATTAGGCAA"), 4),
+    ?assertEqual(dna:hamming_distance("AGACAACAGCCAGCCGCCGGATT", "AGG"), 1).
