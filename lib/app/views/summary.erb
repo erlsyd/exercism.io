@@ -8,8 +8,8 @@
   <% end %>
 <% else %>
 
-  <% if after.approved? %>
-    <p>This exercise has been thoroughly bikeshedded and <b><%= user.username %></b> has moved on.</p>
+  <% if after.done? %>
+    <p>This exercise has been completed.</p>
   <% else %>
     <p>This exercise is still in progress.</p>
   <% end %>
@@ -17,9 +17,12 @@
   <div id="code-timeline" class="pagination pagination-centered">
     <ul>
       <% iterations.each_with_index do |iteration,index| %>
-        <li><a data-revision="<%= index + 1 %>">Rev <%= index + 1 %></a></li>
+        <li><a class="revision <%= iteration == after ? 'selected' : '' %>"
+          data-submission-id="<%= iteration.key %>"
+          data-revision="<%= index + 1 %>">Rev <%= index + 1 %>
+        </a></li>
       <% end %>
-      <% if after.approved? %>
+      <% if after.done? %>
         <li><a data-revision="example">Example</a></li>
       <% end %>
     </ul>
@@ -27,24 +30,22 @@
 
   <div class="row">
 
-    <%= erb :"code/submission", locals: { title: "Start",
-        html: { id: "revision-start" },
-        submission: before } %>
-
     <% iterations.each_with_index do |iteration,index| %>
 
       <%= erb :"code/submission", locals: { title: "Revision #{index + 1}",
-          html: { id: "revision-#{index + 1}", style: "display: none;" },
+          html: { id: "revision-#{index + 1}", style: iteration == after ? '' : "display: none;" },
           submission: iteration } %>
 
     <% end %>
 
-    <%= erb :"code/submission", locals: { title: after.approved? ? "Final" : "Latest",
-        html: { id: "revision-latest" },
-        submission: after } %>
+    <% if iterations.size > 1 %>
+      <%= erb :"code/simple", locals: { title: "Diff",
+        html: { id: "revision-diff", style: "display: none;" },
+        code: '',
+        language: 'diff' } %>
+    <% end %>
 
-    <% if after.approved? %>
-
+    <% if after.done? %>
       <%= erb :"code/simple", locals: { title: "Example",
         html: { id: "revision-example", style: "display: none;" },
         code: Exercism.current_curriculum.in(after.language).assign(after.slug).example,

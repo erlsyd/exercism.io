@@ -1,12 +1,17 @@
-import Test.HUnit (Assertion, (@=?), runTestTT, Test(..))
-import Control.Monad (void)
+import Test.HUnit (Assertion, (@=?), runTestTT, Test(..), Counts(..))
+import System.Exit (ExitCode(..), exitWith)
 import Phone (areaCode, number, prettyPrint)
+
+exitProperly :: IO Counts -> IO ()
+exitProperly m = do
+  counts <- m
+  exitWith $ if failures counts /= 0 || errors counts /= 0 then ExitFailure 1 else ExitSuccess
 
 testCase :: String -> Assertion -> Test
 testCase label assertion = TestLabel label (TestCase assertion)
 
 main :: IO ()
-main = void $ runTestTT $ TestList
+main = exitProperly $ runTestTT $ TestList
        [ TestList numberTests
        , TestList areaCodeTests
        , TestList prettyPrintTests ]
@@ -23,6 +28,14 @@ numberTests =
     "0000000000" @=? number "21234567890"
   , testCase "invalid when 9 digits" $
     "0000000000" @=? number "123456789"
+  , testCase "invalid when empty" $
+    "0000000000" @=? number ""
+  , testCase "invalid when no digits present" $
+    "0000000000" @=? number " (-) "
+  , testCase "valid with leading characters" $
+    "1234567890" @=? number "my number is 123 456 7890"
+  , testCase "valid with trailing characters" $
+    "1234567890" @=? number "123 456 7890 - bob"
   ]
 
 areaCodeTests :: [Test]

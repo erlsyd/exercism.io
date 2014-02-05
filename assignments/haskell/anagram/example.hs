@@ -1,11 +1,12 @@
 module Anagram (anagramsFor) where
 import Data.Char (toLower)
-import Data.Map (Map, fromListWith)
+import Data.List (sort)
 
 anagramsFor :: String -> [String] -> [String]
-anagramsFor word = filter ((canonical ==) . canonicalize)
+anagramsFor word = filter isDifferent
   where
-    canonical = canonicalize word
-    canonicalize :: String -> Map Char Int
-    canonicalize = fromListWith (+) . map key
-    key char = (toLower char, 1)
+    la = map toLower word
+    sa = sort la
+    isDifferent b = la /= lb && sa == sb
+      where lb = map toLower b
+            sb = sort lb

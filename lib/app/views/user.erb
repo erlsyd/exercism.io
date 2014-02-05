@@ -4,10 +4,35 @@
     <p>GitHub Profile: <%= github_profile_link(user) %></p>
 
     <% if current_user.is?(user.username) %>
-    <p>You've left <%= user.comments.count %> nits.</p>
+      <p>Create a <a href="/teams">new team</a>.</p>
+
+      <% if (user.teams | user.teams_created).any? %>
+        <p>You are on the following teams:</p>
+        <ul>
+          <% (user.teams | user.teams_created).each do |team| %>
+            <li><a href="/teams/<%= team.slug %>"><%= team.slug %></a></li>
+          <% end %>
+        </ul>
+      <% end %>
+      <p>
+        You've left
+        <% if user.comments.any? %>
+          <a href="/user/history"><%= user.comments.count %> nits</a>.
+        <% else %>
+          <%= user.comments.count %> nits.
+        <% end %>
+      </p>
     <% end %>
 
+    <h3>Exercises</h3>
     <h4>Current</h4>
+    <% if current.none? %>
+      <% if current_user.is?(user.username) %>
+        <p>You have not submitted any exercises lately.</p>
+      <% else %>
+        <p>This coder has not submitted any exercises lately.</p>
+      <% end %>
+    <% end %>
     <ul>
       <% current.each do |exercise| %>
         <li>
@@ -26,8 +51,6 @@
         <dt>Api key:</dt>
         <dd><%= current_user.key %></dd>
       </dl>
-
-      <%= erb :"setup/unstarted_trails" %>
 
     <p>You can update your <%= gravatar_tag current_user.avatar_url %> Gravatar on
       <a href="http://www.gravatar.com/">the Gravatar website.</a></p>
@@ -49,6 +72,13 @@
 <div class="row">
   <div class="span12">
     <h4>Completed</h4>
+    <% if completed.none? %>
+      <% if current_user.is?(user.username) %>
+        <p>You have not completed any exercises.</p>
+      <% else %>
+        <p>This coder has not completed any exercises.</p>
+      <% end %>
+    <% end %>
   </div>
 </div>
 <div class="row">

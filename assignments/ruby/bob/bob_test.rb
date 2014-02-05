@@ -5,7 +5,7 @@ begin
 rescue LoadError => e
   eval("\"#{DATA.read}\n\"").split("\n.\n").each_with_index do |s,i|
     if i > 0
-      puts "\t--- press a key to continue ---"
+      puts "\t--- press enter to continue ---"
       gets
     end
     puts "\n\n", s, "\n\n\n"
@@ -57,6 +57,16 @@ class TeenagerTest < MiniTest::Unit::TestCase
   def test_shouting_numbers
     skip
     assert_equal 'Woah, chill out!', teenager.hey('1, 2, 3 GO!')
+  end
+
+  def test_only_numbers
+    skip
+    assert_equal 'Whatever.', teenager.hey('1, 2, 3')
+  end
+
+  def test_question_with_only_numbers
+    skip
+    assert_equal 'Sure.', teenager.hey('4?')
   end
 
   def test_shouting_with_special_characters

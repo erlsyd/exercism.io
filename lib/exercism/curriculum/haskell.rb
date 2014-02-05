@@ -7,11 +7,14 @@ class Exercism
         grade-school robot-name leap etl meetup space-age grains
         gigasecond triangle scrabble-score roman-numerals
         binary prime-factors raindrops allergies
-        atbash-cipher
+        atbash-cipher bank-account
         crypto-square kindergarten-garden robot-simulator queen-attack
         accumulate binary-search-tree difference-of-squares hexadecimal
         largest-series-product luhn matrix ocr-numbers octal trinary
-        wordy
+        wordy simple-linked-list linked-list nth-prime palindrome-products
+        pascals-triangle pig-latin pythagorean-triplet saddle-points say
+        secret-handshake series sieve simple-cipher strain sum-of-multiples
+        parallel-letter-frequency
       )
     end
 

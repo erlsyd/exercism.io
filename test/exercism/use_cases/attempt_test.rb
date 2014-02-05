@@ -21,22 +21,18 @@ class FempCurriculum
 end
 
 class AttemptTest < Minitest::Test
+  include DBCleaner
 
   attr_reader :user, :curriculum
   def setup
+    super
     data = {
-      current: {'nong' => 'two', 'femp' => 'two'},
       completed: {'nong' => ['one'], 'femp' => ['one']}
     }
     @user = User.create(data)
     @curriculum = Curriculum.new('/tmp')
     @curriculum.add NongCurriculum.new
     @curriculum.add FempCurriculum.new
-  end
-
-  def teardown
-    Mongoid.reset
-    @user = nil
   end
 
   def test_saving_an_attempt_constructs_a_submission
@@ -86,7 +82,7 @@ class AttemptTest < Minitest::Test
   end
 
   def test_a_new_attempt_supersedes_the_previous_hibernating_one
-    submission = Submission.create(user: user, language: 'femp', slug: 'two', at: Time.now, state: 'hibernating')
+    submission = Submission.create(user: user, language: 'femp', slug: 'two', created_at: Time.now, state: 'hibernating')
     Attempt.new(user, 'CODE 2', 'two/two.fp', curriculum).save
     one, two = user.reload.submissions
     assert one.superseded?
@@ -94,7 +90,9 @@ class AttemptTest < Minitest::Test
   end
 
   def test_a_new_attempt_unmutes_previous_attempt
-    submission = Submission.create(user: user, language: 'femp', slug: 'two', at: Time.now, muted_by: %w(tom jerry))
+    tom = User.create(username: 'tom')
+    jerry = User.create(username: 'jerry')
+    submission = Submission.create(user: user, language: 'femp', slug: 'two', created_at: Time.now, muted_by: [tom, jerry])
     Attempt.new(user, 'CODE 2', 'two/two.fp', curriculum).save
     assert_equal [], submission.reload.muted_by
   end
@@ -152,6 +150,16 @@ class AttemptTest < Minitest::Test
   def test_no_reject_without_previous
     attempt = Attempt.new(user, "\nCODE1\n\nCODE2\n\n\n", 'two/two.fp', curriculum)
     assert_equal false, attempt.duplicate?
+  end
+
+  def test_attempt_sets_exercise_as_current
+    attempt = Attempt.new(user, "\nCODE1\n\nCODE2\n\n\n", 'two/two.fp', curriculum).save
+    assert user.working_on?(Exercise.new('femp', 'two'))
+  end
+
+  def test_attempt_doesnt_set_completed_exercise_as_current
+    attempt = Attempt.new(user, "\nCODE1\n\nCODE2\n\n\n", 'one/one.fp', curriculum).save
+    refute user.working_on?(Exercise.new('femp', 'one'))
   end
 end
 

@@ -4,6 +4,7 @@ require 'bundler'
 Bundler.require
 
 require 'app'
+require 'api'
 
 ENV['RACK_ENV'] ||= 'development'
 
@@ -17,5 +18,9 @@ if ENV['RACK_ENV'].to_sym == :development
   use NewRelic::Rack::DeveloperMode
 end
 
+use ActiveRecord::ConnectionAdapters::ConnectionManagement
 run ExercismApp
 
+map '/api/v1/' do
+  run ExercismAPI
+end

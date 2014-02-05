@@ -1,7 +1,9 @@
+*.beam
 *.gem
 *.rbc
 *.pyc
 *.swp
+*.beam
 .bundle
 .config
 .DS_Store
@@ -16,6 +18,9 @@ test/version_tmp
 tmp
 .ruby-version
 
+# JavaScript
+node_modules
+
 # ENV vars
 scripts/boot.sh
 
@@ -24,3 +29,4 @@ scripts/boot.sh
 _yardoc
 doc/
 .approvals
+db/*sqlite

@@ -1,35 +1,10 @@
-require './test/mongo_helper'
-
-require 'exercism/locksmith'
-require 'exercism/problem_set'
-require 'exercism/input_sanitation'
-require 'exercism/user'
-require 'exercism/null_submission'
-require 'exercism/exercise'
-require 'exercism/locale'
-require 'exercism/trail'
-require 'exercism/comment'
-require 'exercism/submission'
-require 'exercism/notification'
+require './test/integration_helper'
 
 class UserTest < Minitest::Test
-
-  def teardown
-    Mongoid.reset
-  end
-
-  def test_identical_users_are_identical
-    attributes = {
-      username: 'alice',
-      current: {'nong' => 'one'},
-    }
-    user1 = User.new(attributes)
-    user2 = User.new(attributes)
-    assert_equal user1, user2
-  end
+  include DBCleaner
 
   def test_user_create_key
-    user = User.new
+    user = User.create
     assert_match %r{\A[a-z0-9]{40}\z}, user.key
   end
 
@@ -49,31 +24,6 @@ class UserTest < Minitest::Test
     user = User.new(current: {'nong' => 'one'})
     one = Exercise.new('nong', 'one')
     refute user.nitpicker_on?(one)
-  end
-
-  def test_user_may_nitpick_an_exercise_they_completed
-    user = User.new(current: {'nong' => 'one'})
-    nong = Locale.new('nong', 'no', 'not')
-    trail = Trail.new(nong, ['one', 'two'], '/tmp')
-
-    one = Exercise.new('nong', 'one')
-    user.complete!(one, on: trail)
-    assert user.may_nitpick?(one)
-  end
-
-  def test_user_may_not_nitpick_future_assignments
-    user = User.new(current: {'nong' => 'one'})
-    nong = Locale.new('nong', 'no', 'not')
-    trail = Trail.new(nong, ['one', 'two'], '/tmp')
-
-    two = Exercise.new('nong', 'two')
-    refute user.may_nitpick?(two)
-  end
-
-  def test_user_may_nitpick_current_assignments
-    user = User.new(current: {'nong' => 'one'})
-    one = Exercise.new('nong', 'one')
-    assert user.may_nitpick?(one)
   end
 
   def test_user_not_a_guest
@@ -161,11 +111,11 @@ class UserTest < Minitest::Test
     user = User.create(current: {'nong' => 'one'})
     exercise = Exercise.new('nong', 'one')
 
-    user.submissions << create_submission(exercise, :code => "s1")
+    user.submissions << create_submission(exercise, :code => "s1", state: 'superseded')
     user.submissions << create_submission(exercise, :code => "s2")
     user.save
+    user.reload
 
-    assert_equal [true], user.ongoing.map(&:submitted?)
     assert_equal ["s2"], user.ongoing.map(&:code)
   end
 
@@ -175,8 +125,8 @@ class UserTest < Minitest::Test
   end
 
   def test_user_done_without_submissions
-    user = User.create(current: {'nong' => 'one'}, completed: {'nong' => ['one']})
-    assert_equal [false], user.done.map(&:submitted?)
+    user = User.create(current: {'nong' => 'one'})
+    assert_equal [], user.done
   end
 
   def test_user_done_with_submissions
@@ -186,8 +136,8 @@ class UserTest < Minitest::Test
     user.submissions << create_submission(exercise, :code => "s1")
     user.submissions << create_submission(exercise, :code => "s2")
     user.save
+    user.reload
 
-    assert_equal [true], user.done.map(&:submitted?)
     assert_equal ["s2"], user.done.map(&:code)
   end
 
@@ -201,6 +151,16 @@ class UserTest < Minitest::Test
 
   def test_user_is_not_locksmith_by_default
     refute User.new.locksmith?
+  end
+
+  def test_find_user_by_case_insensitive_username
+    %w{alice bob}.each do |name| User.create username: name end
+    assert_equal 'alice', User.find_by_username('ALICE').username
+  end
+
+  def test_find_a_bunch_of_users_by_case_insensitive_username
+    %w{alice bob fred}.each do |name| User.create username: name end
+    assert_equal ['alice', 'bob'], User.find_in_usernames(['ALICE', 'BOB']).map(&:username)
   end
 
   private
