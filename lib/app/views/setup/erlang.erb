@@ -1,0 +1,11 @@
+<h3>Erlang</h3>
+
+<h4>Installation: </h4>
+
+<p>
+  Download and install a recent Erlang/OTP release for your OS from
+  <a href="http://www.erlang.org/download.html">erlang.org</a>.
+</p>
+
+<h4>Building and running tests: </h4>
+<pre>$ erl -make && erl -noshell -eval 'init:stop(case bob_tests:test() of ok -> 0; _ -> 1 end).'</pre>
